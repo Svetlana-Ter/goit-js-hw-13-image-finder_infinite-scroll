@@ -67,8 +67,3 @@ img {
 .stats-item:not(:last-child) {
   margin-right: 10px;
 }
-
-.btn {
-  cursor: pointer;
-  font-weight: bold;
-}

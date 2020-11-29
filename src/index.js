@@ -12,23 +12,20 @@ defaults.delay = 1000;
 const refs = {
   form: document.querySelector('#search-form'),
   galleryContainer: document.querySelector('.gallery'),
-  btn: document.querySelector('.js-btn'),
+  intersectingElement: document.querySelector('.intersectingElement'),
 }
 
 const apiService = new ApiService();
-
-
 refs.form.addEventListener('submit', onImagesSearch);
-refs.btn.addEventListener('click', onLoadMore)
 
 function onImagesSearch(e) {
   e.preventDefault();
   apiService.query = e.currentTarget.elements.query.value;
-  if (!e.currentTarget.elements.query.value) {
+  if (!apiService.query) {
     info({
       title: 'Write something for search',
     });
-  } else if (e.currentTarget.elements.query.value) {
+  } else if (apiService.query) {
     apiService.resetPage();
     apiService.fetchImages().then(images => {
     clearContainer();
@@ -37,17 +34,24 @@ function onImagesSearch(e) {
   }
 }
 
+const onEntry = entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting && apiService.query !== '') {
+      onLoadMore();
+    }
+  })
+}
+
+const options = {
+  rootMargin: '350px'
+}
+
+const observer = new IntersectionObserver(onEntry, options);
+observer.observe(refs.intersectingElement);
+
 function onLoadMore() {
   apiService.fetchImages().then(images => {
-      const { y } = refs.galleryContainer.getBoundingClientRect();
-      const screenHeight = document.documentElement.clientHeight;
-
-      renderImages(images);
-
-      window.scrollTo({
-        top: screenHeight - y,
-        behavior: 'smooth'
-      });
+    renderImages(images);
   })
 }
 
